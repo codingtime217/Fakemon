@@ -1,2 +1,2 @@
-from classes import pokemon,testType
+from classes import *
 
