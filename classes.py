@@ -41,9 +41,9 @@ class pokemon():
         self.hp = {"current":hp,"max":hp}
         self.actualname = actualname
         if givenname == "":
-            self.givenname = actualname
+            self.givenName = actualname
         else:
-            self.givenname = givenname
+            self.givenName = givenname
         self.dodge = dodge
         self.speed = speed
         self.type = type
@@ -51,7 +51,7 @@ class pokemon():
         self.level = level
         self.scaleing = scaleing
         self.attacks = attacks
-        self.evolution = None
+        self.evolution = evolution
 
         #defines values for all fakemon
     def levelUp(self,force = False):
@@ -73,10 +73,18 @@ class pokemon():
                 #increases all attributes by their relevant amount
         except:
             pass
+
+
     def attack(self,choice):
         attack = self.attacks[choice]
+        data = readFile(self.type + "Moves.txt")[attack]
+        print(attack + str(data))
+        return data
+    
+
     def evolve(self):
-        self.__dict__.update(createPoke())
+        self.__dict__ = createPoke(self.evolution,True,self).__dict__
+
 
 class character():
     def __init__(self,pokemon ={},level=0,name = "TestyMcTestFace"):
@@ -90,6 +98,8 @@ class combat():
         self.enemyPs = enemyPs.pokemon
         self.currentPs = currentPs
 
+    def turn(self):
+        pass
 
 
 class testType(pokemon):
@@ -98,28 +108,25 @@ class testType(pokemon):
 
 
 
-def createPoke(pokeName,evolving = False, oldName = "",oldAttacks = None): #generalised fucntion to create pokemon objects of a given pokemon name (ie "Pikachu")
+def createPoke(pokeName,evolving = False, old=pokemon()): #generalised fucntion to create pokemon objects of a given pokemon name (ie "Pikachu")
     type = pokeDatabase[pokeName]
     stats = readFile(type + "Pokes.txt")[pokeName]
-    print(stats)
+    given = ""
     while len(stats) < 7:
         stats.append(None)
     if evolving == True:
-        given = oldName
-        stats[5] = oldAttacks
+        if old.givenName != old.actualname:
+            given = old.givenName
+        stats[5] = old.attacks
     else:
-        given = ""
+        stats[5] = [stats[5]]
     for i in range(0,5):
         if i == 4:
             for j in range(0,3):
                 stats[i][j] = int(stats[i][j])
         else:
             stats[i] = int(stats[i])
-
-    poke = pokemon(pokeName,stats[0],stats[1],stats[2],type=type,scaleing=stats[4],attacks=stats[5],evolution=stats[6],givenname=given)
-    for i in range(0,stats[3]):
+    poke = pokemon(actualname=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],attacks=stats[5],evolution=stats[6],givenname=given)
+    for i in range(0,stats[3]-1):
         poke.levelUp(force = True)
     return poke
-
-quagsire = createPoke("Quagsire")
-print(quagsire.hp)

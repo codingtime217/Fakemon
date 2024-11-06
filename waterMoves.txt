@@ -1,5 +1,5 @@
-Water Gun,3,75
-Bubble,5,50
-Hydro Pump,9,30
-Hydro Cannon,15,30
-Muddy Water,3,50
+Water Gun:3,75
+Bubble:5,50
+Hydro Pump:9,30
+Hydro Cannon:15,30
+Muddy Water:3,50
