@@ -1,6 +1,6 @@
 
 
-def readFile(fileName):
+def readFile(fileName,asDict = False):
     file = open(fileName,"rt")#reads file in accordance to how I set it up
     data = {}
     for line in file:
@@ -10,7 +10,20 @@ def readFile(fileName):
         for i in range(0,len(info[1])):
             if "," in info[1][i]:
                 info[1][i] = info[1][i].split(",")
-        data[info[0]] = info[1]
+        if asDict == False:
+            if "," in info[0]:          
+                info[0] = info[0].split(",")
+                data[info[0][0]] = info[1]
+            else:
+                data[info[0]] = info[1]    
+        else:
+            info[0] = info[0].split(",")
+            print(info[0])
+            info[0][1] = int(info[0][1])
+            if info[0][1] not in data.keys():
+                data[info[0][1]] = [info[0][0]]
+            else:
+                info[0][1].append(info[0][0])
     file.close()
     return data
 
@@ -71,20 +84,23 @@ class pokemon():
                 self.dodge += self.scaleing[1]
                 self.speed += self.scaleing[2]
                 #increases all attributes by their relevant amount
+            if (self.level - 1) % 3 ==0:
+                self.addAttack()
         except:
             pass
-
+    
+    def addAttack(self):
+        file = self.type + "Moves.txt"
+        data = readFile(file,True)
+        print(data)
 
     def attack(self,choice):
         attack = self.attacks[choice]
-        data = readFile(self.type + "Moves.txt")[attack]
-        print(attack + str(data))
+        data = readFile(self.type + "Moves.txt")[attack][1]
         return data
     
-
     def evolve(self):
         self.__dict__ = createPoke(self.evolution,True,self).__dict__
-
 
 class character():
     def __init__(self,pokemon ={},level=0,name = "TestyMcTestFace"):
@@ -94,17 +110,19 @@ class character():
 
 class combat():
     def __init__(self,playerPs=character(),enemyPs=character(),currentPs=["",""]):
-        self.playerPs = playerPs.pokemon
-        self.enemyPs = enemyPs.pokemon
-        self.currentPs = currentPs
+        self.playerPokes = playerPs.pokemon
+        self.enemyPokes = enemyPs.pokemon
+        self.currentPokes = currentPs
 
-    def turn(self):
+    def oneRound(self):
+        #pick npc attack
+        #choose player action
+        #determine resolution order
+        #resolve
+        #process status effects
+        #check for fainting
+        #if fainting - select replacement
         pass
-
-
-class testType(pokemon):
-    def __init__(self):
-        pokemon.__init__(self = self,name = "TestyMcTestFace",type = "Test")
 
 
 
@@ -130,3 +148,7 @@ def createPoke(pokeName,evolving = False, old=pokemon()): #generalised fucntion 
     for i in range(0,stats[3]-1):
         poke.levelUp(force = True)
     return poke
+
+
+boi = createPoke("Wooper")
+boi.addAttack()
