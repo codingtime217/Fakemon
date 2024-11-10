@@ -1,6 +1,6 @@
 
 
-def readFile(fileName,asDict = False):
+def readFile(fileName,byIndex = False):
     file = open(fileName,"rt")#reads file in accordance to how I set it up
     data = {}
     for line in file:
@@ -10,20 +10,21 @@ def readFile(fileName,asDict = False):
         for i in range(0,len(info[1])):
             if "," in info[1][i]:
                 info[1][i] = info[1][i].split(",")
-        if asDict == False:
+        if byIndex == False:
             if "," in info[0]:          
                 info[0] = info[0].split(",")
                 data[info[0][0]] = info[1]
             else:
                 data[info[0]] = info[1]    
+            #turns the file into a dictionary based on the name of each record
         else:
             info[0] = info[0].split(",")
-            print(info[0])
             info[0][1] = int(info[0][1])
             if info[0][1] not in data.keys():
                 data[info[0][1]] = [info[0][0]]
             else:
-                info[0][1].append(info[0][0])
+                data[info[0][1]].append(info[0][0])
+            #turns the file into a dictionary based on the number attached to each record
     file.close()
     return data
 
@@ -41,6 +42,7 @@ def setup():
     airTypes = {}
     global pokeDatabase
     pokeDatabase = {**waterTypes,**fireTypes,**grassTypes,**airTypes}
+
 setup()
 
 
@@ -68,31 +70,62 @@ class pokemon():
 
         #defines values for all fakemon
     def levelUp(self,force = False):
-        if force == True:
+        def applyChanges():
             self.level += 1
             self.hp["max"] += self.scaleing[0]
             self.dodge += self.scaleing[1]
             self.speed += self.scaleing[2]
             self.hp["current"] = self.hp["max"]
+            #defined to make prcess easier
+        if force == True:
+            applyChanges()
             return
         try:
             if self.xp >= pokemon.XpThresholds[self.level-1]:
                 self.xp -= pokemon.XpThresholds[self.level-1]
-                self.level += 1
                 #checks if xp is suffecient for level up, and applies it
-                self.hp["max"] += self.scaleing[0]
-                self.dodge += self.scaleing[1]
-                self.speed += self.scaleing[2]
+                applyChanges()
                 #increases all attributes by their relevant amount
             if (self.level - 1) % 3 ==0:
-                self.addAttack()
+                print("learning new attack")
+                self.addAttack() # they learn a new attack every 3 levels, meaning they will have 6 by the end
         except:
             pass
     
     def addAttack(self):
+        def removeDuplicates(current,new):
+            output = [] # used to check for duplicate attacks (already learned)
+            for i in range(0,len(new)):
+                if not new[i] in current:
+                    output.append(new[i])
+            return output
+        print("running function")
         file = self.type + "Moves.txt"
         data = readFile(file,True)
-        print(data)
+        avalible = []
+        for i in data.keys():
+            if i <= self.level:
+                try:
+                    for j in data[i]:
+                        avalible.append(j)
+                except:
+                    avalible.append(data[i]) # makes a list of attack availible to learn
+        avalible = removeDuplicates(self.attacks,avalible)
+        print(avalible)
+        toDisplay = (f"""{self.givenName} can learn a new move, enter the associated number to pick the new move:
+""")
+        newLine = "\n"
+        for i in range(0,len(avalible)):
+            toDisplay = toDisplay + f"{i} - {avalible[i]}{newLine}"
+        toDisplay = toDisplay + "\n"
+
+        while True:
+            try:
+                chosen = int(input(toDisplay))
+                break
+            except:
+                print("Enter the integer that corresponds with the attack")
+        self.attacks.append(avalible[chosen])
 
     def attack(self,choice):
         attack = self.attacks[choice]
@@ -148,7 +181,3 @@ def createPoke(pokeName,evolving = False, old=pokemon()): #generalised fucntion 
     for i in range(0,stats[3]-1):
         poke.levelUp(force = True)
     return poke
-
-
-boi = createPoke("Wooper")
-boi.addAttack()
