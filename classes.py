@@ -1,8 +1,12 @@
-
+file = open("waterMoves.txt","rt")
+for line in file:
+    print(line)
 
 def readFile(fileName,byIndex = False):
+    print("called successfully")
     file = open(fileName,"rt")#reads file in accordance to how I set it up
     data = {}
+    
     for line in file:
         info = line.split(":")
         info[1] = info[1].strip("\n")
@@ -16,16 +20,20 @@ def readFile(fileName,byIndex = False):
                 data[info[0][0]] = info[1]
             else:
                 data[info[0]] = info[1]    
+            print(data)
             #turns the file into a dictionary based on the name of each record
         else:
+            print(line)
             info[0] = info[0].split(",")
             info[0][1] = int(info[0][1])
             if info[0][1] not in data.keys():
                 data[info[0][1]] = [info[0][0]]
             else:
                 data[info[0][1]].append(info[0][0])
+            print(data)
             #turns the file into a dictionary based on the number attached to each record
     file.close()
+    print("returning data")
     return data
 
 
@@ -87,7 +95,6 @@ class pokemon():
                 applyChanges()
                 #increases all attributes by their relevant amount
             if (self.level - 1) % 3 ==0:
-                print("learning new attack")
                 self.addAttack() # they learn a new attack every 3 levels, meaning they will have 6 by the end
         except:
             pass
@@ -99,8 +106,9 @@ class pokemon():
                 if not new[i] in current:
                     output.append(new[i])
             return output
-        print("running function")
+        print(f"{self.givenName} can learn a new move")
         file = self.type + "Moves.txt"
+        print(file)
         data = readFile(file,True)
         avalible = []
         for i in data.keys():
@@ -112,13 +120,31 @@ class pokemon():
                     avalible.append(data[i]) # makes a list of attack availible to learn
         avalible = removeDuplicates(self.attacks,avalible)
         print(avalible)
-        toDisplay = (f"""{self.givenName} can learn a new move, enter the associated number to pick the new move:
-""")
         newLine = "\n"
+        toDisplay = f"Pick the move {self.givenName} will learn: {newLine}"
         for i in range(0,len(avalible)):
             toDisplay = toDisplay + f"{i} - {avalible[i]}{newLine}"
-        toDisplay = toDisplay + "\n"
-
+        input("is it running")
+        if len(self.attacks) >= 6:
+            toShow = ""
+            for i in self.attacks[0:3]:
+                toShow = toShow + i + ", "
+            toShow = toShow + self.attacks[4] + "and " + self.attacks[5]
+            choice = input(f"Currently {self.givenName} has {toShow}. Would you like you like to replace an attack? Y/N {newLine}")
+            while True:
+                if choice.lower() == "n":
+                    print(f"{self.givenName} will keep their current attacks")
+                    return
+                elif choice.lower() == "y":
+                    break
+                else:
+                    choice = input("That was not a valid option, would you like to replace an attack? Y/N \n")
+            try:
+                replace = input("Which attack would you like to replace")
+                self.attacks.remove(replace)
+            except:
+                print(f"{self.givenName} does not have that move, they have {toShow}.")
+        input("Why the hell isn' it running")
         while True:
             try:
                 chosen = int(input(toDisplay))
@@ -135,11 +161,22 @@ class pokemon():
     def evolve(self):
         self.__dict__ = createPoke(self.evolution,True,self).__dict__
 
+
+
+
+
+
+
+
+
+
 class character():
     def __init__(self,pokemon ={},level=0,name = "TestyMcTestFace"):
         self.pokemon = pokemon
         self.level = level
         self.name = name
+
+
 
 class combat():
     def __init__(self,playerPs=character(),enemyPs=character(),currentPs=["",""]):
@@ -181,3 +218,10 @@ def createPoke(pokeName,evolving = False, old=pokemon()): #generalised fucntion 
     for i in range(0,stats[3]-1):
         poke.levelUp(force = True)
     return poke
+
+boi = createPoke("Wooper")
+boi.xp = 10000000000000
+for i in range(0,20):
+    boi.levelUp()
+    print(boi.level)
+print(boi.attacks)

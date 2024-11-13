@@ -1,3 +1,3 @@
 Wooper:20;15;15;1;4,3,3;Bubble;Quagsire
 Quagsire:25;10;10;10;5,2,3
-Mudkip:10;20;20;1;3,3,4;Water Gun
+Mudkip:10;20;20;1;3,3,4;Splash
