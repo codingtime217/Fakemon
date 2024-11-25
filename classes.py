@@ -11,6 +11,7 @@ def readFile(fileName,byIndex = False):
         for i in range(0,len(info[1])):
             if "," in info[1][i]:
                 info[1][i] = info[1][i].split(",")
+
         if byIndex == False:
             if "," in info[0]:          
                 info[0] = info[0].split(",")
@@ -53,7 +54,7 @@ setup()
 
 class pokemon():
     XpThresholds = [1000, 1090, 1188, 1295, 1412000, 1090, 1188, 1295, 1412, 1539, 1677, 1828, 1993, 2172, 2367, 2580, 2813, 3066, 3342, 3642, 3970, 4328, 4717, 5142] #xp thresholds for each level up
-    def __init__(self,actualname = "",hp=1,dodge = 5,speed = 0,xp=0,level =1,scaleing = [1,1,1],attacks = None,type=None,evolution = None,givenname = ""):
+    def __init__(self,actualname = "",hp=1,dodge = 5,speed = 0,xp=0,level =1,scaleing = [1,1,1],attacks = None,type=None,evolutionInfo = None,givenname = ""):
         self.hp = {"current":hp,"max":hp}
         self.actualname = actualname
         if givenname == "":
@@ -67,7 +68,9 @@ class pokemon():
         self.level = level
         self.scaleing = scaleing
         self.attacks = attacks
-        self.evolution = evolution
+        self.evolutionInfo = evolutionInfo
+        if self.evolutionInfo == None:
+            self.evolutionInfo == [None,1000000]
 
         #defines values for all fakemon
     def levelUp(self,force = False):
@@ -89,6 +92,9 @@ class pokemon():
                 #increases all attributes by their relevant amount
             if (self.level - 1) % 3 ==0:
                 self.addAttack() # they learn a new attack every 3 levels, meaning they will have 6 by the end
+            if self.level >= int(self.evolutionInfo[1]):
+                print(f"{self.givenName} is evolving into a {self.evolutionInfo[0]}")
+                self.evolve()
         except:
             pass
     
@@ -150,7 +156,7 @@ class pokemon():
         return data
     
     def evolve(self):
-        self.__dict__ = createPoke(self.evolution,True,self).__dict__
+        self.__dict__ = createPoke(pokeName=self.evolutionInfo[0],evolving=True,old = self).__dict__
 
 
 
@@ -187,15 +193,17 @@ class combat():
 
 
 
-def createPoke(pokeName,evolving = False, old=pokemon()): #generalised fucntion to create pokemon objects of a given pokemon name (ie "Pikachu")
+def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalised fucntion to create pokemon objects of a given pokemon name (ie "Pikachu")
     type = pokeDatabase[pokeName]
     stats = readFile(type + "Pokes.txt")[pokeName]
-    given = ""
+    print(stats)
+    xp = old.xp
     while len(stats) < 7:
         stats.append(None)
     if evolving == True:
         if old.givenName != old.actualname:
             given = old.givenName
+            print("names don't mathc")
         stats[5] = old.attacks
     else:
         stats[5] = [stats[5]]
@@ -205,7 +213,11 @@ def createPoke(pokeName,evolving = False, old=pokemon()): #generalised fucntion 
                 stats[i][j] = int(stats[i][j])
         else:
             stats[i] = int(stats[i])
-    poke = pokemon(actualname=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],attacks=stats[5],evolution=stats[6],givenname=given)
+    print(stats[6])
+    poke = pokemon(actualname=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],attacks=stats[5],evolutionInfo=stats[6],givenname=given)
     for i in range(0,stats[3]-1):
         poke.levelUp(force = True)
+    poke.xp = xp
+    print(poke.givenName)
+    print(poke.hp)
     return poke
