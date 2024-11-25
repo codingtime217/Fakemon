@@ -1,4 +1,4 @@
-
+import random
 
 def readFile(fileName,byIndex = False):
     file = open(fileName,"rt")#reads file in accordance to how I set it up
@@ -73,7 +73,7 @@ class pokemon():
             self.evolutionInfo == [None,1000000]
 
         #defines values for all fakemon
-    def levelUp(self,force = False):
+    def levelUp(self,force = False,ai=False):
         def applyChanges():
             self.level += 1
             self.hp["max"] += self.scaleing[0]
@@ -91,7 +91,10 @@ class pokemon():
                 applyChanges()
                 #increases all attributes by their relevant amount
             if (self.level - 1) % 3 ==0:
-                self.addAttack() # they learn a new attack every 3 levels, meaning they will have 6 by the end
+                if ai == True
+                    self.addAttack(random = True) # they learn a new attack every 3 levels, meaning they will have 6 by the end
+                else:
+                    self.addAttack()           
             if self.level >= int(self.evolutionInfo[1]):
                 print(f"{self.givenName} is evolving into a {self.evolutionInfo[0]}")
                 self.evolve()
@@ -148,6 +151,29 @@ class pokemon():
                 break
             except:
                 print("Enter the integer that corresponds with the attack")
+        self.attacks.append(avalible[chosen])
+
+    def addAttack(self,random = True): # this is an alternate version for the ai to use when making pokemon that picks new attacks randomly
+        def removeDuplicates(current,new):
+            output = [] # used to check for duplicate attacks (already learned)
+            for i in range(0,len(new)):
+                if not new[i] in current:
+                    output.append(new[i])
+            return output
+        file = self.type + "Moves.txt"
+        data = readFile(file,True)
+        avalible = []
+        for i in data.keys():
+            if i <= self.level:
+                try:
+                    for j in data[i]:
+                        avalible.append(j)
+                except:
+                    avalible.append(data[i]) # makes a list of attack availible to learn
+        avalible = removeDuplicates(self.attacks,avalible)
+        if len(self.attacks) >= 6:
+            self.attacks.pop(0)
+        chosen = random.randint(0,len(avalible))
         self.attacks.append(avalible[chosen])
 
     def attack(self,choice):
