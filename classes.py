@@ -91,7 +91,7 @@ class pokemon():
                 applyChanges()
                 #increases all attributes by their relevant amount
             if (self.level - 1) % 3 ==0:
-                if ai == True
+                if ai == True:
                     self.addAttack(random = True) # they learn a new attack every 3 levels, meaning they will have 6 by the end
                 else:
                     self.addAttack()           
@@ -202,12 +202,15 @@ class character():
 
 
 class combat():
-    def __init__(self,playerPs=character(),enemyPs=character(),currentPs=["",""]):
+    def __init__(self,playerPs=character(),enemyPs=character(),currentPs=[0,0]):
         self.playerPokes = playerPs.pokemon
         self.enemyPokes = enemyPs.pokemon
-        self.currentPokes = currentPs
+        self.currentPokes = currentPs # note, first number will be player index, 2nd will be enemy
 
     def oneRound(self):
+        player = self.playerAction()
+        npc = self.npcAction()
+        self.resolve(player,npc)
         #pick npc attack
         #choose player action
         #determine resolution order
@@ -216,6 +219,34 @@ class combat():
         #check for fainting
         #if fainting - select replacement
         pass
+
+    def playerAction(self):
+        #choose player action
+        pass
+
+    def npcAction(self):
+        #determine the AI's action
+        pass
+    def resolve(self,player=[["Skip Turn",100],],npc = [["Skip Turn",100],]):
+        #determine whose action goes first and resolve that one
+        #format of action info is [["Action Name",speed],infomation needed for action]
+        if player[0][1] >= npc[0][1]:
+            pass
+            #do player action first
+        else:
+            pass
+            #do npc action first
+        pass
+
+    def swapPoke(self,who = None):
+        #swapout the currently selected pokemon
+        if who == "npc":
+            scores = [x.hp for x in self.enemyPokes]
+            index = index(max(scores))
+            self.currentPokes[1] = index
+        else:
+            print(f"Which pokemon would you like to swap for?")
+
 
 
 
