@@ -203,9 +203,16 @@ class character():
 
 class combat():
     def __init__(self,playerPs=character(),enemyPs=character(),currentPs=[0,0]):
-        self.playerPokes = playerPs.pokemon
+        self.playerPokes = playerPs.pokemon # these will only store none fainted pokemon, fainted pokemon will be removed
         self.enemyPokes = enemyPs.pokemon
         self.currentPokes = currentPs # note, first number will be player index, 2nd will be enemy
+
+    def makeAttack(self,attackInfo,target):
+        hitchance = (attackInfo[1] + target.dodge) / 2
+        if random.randint(1,101) <= hitchance:
+            return True
+        else:
+            return False
 
     def oneRound(self):
         player = self.playerAction()
@@ -217,7 +224,21 @@ class combat():
         #resolve
         #process status effects
         #check for fainting
-        #if fainting - select replacement
+        if self.playerPokes[self.currentPokes[0]].hp["current"] <= 0:
+            if len(self.playerPokes) == 0:
+                #player lost end combat
+                pass
+            else:
+                self.remaingPlayerPokes.pop(self.currentPokes[0])
+            pass
+            #player fainting - select replacement
+        elif self.enemyPokes[self.currentPokes[1]].hp["current"] <= 0:
+            #enemey fainted - select replacement
+            if len(self.enemyPokes) == 0:
+                #player lost end combat
+                pass
+            else:
+                self.remaingEnemyPokes.pop(self.currentPokes[1])
         pass
 
     def playerAction(self):
@@ -231,6 +252,14 @@ class combat():
         #determine whose action goes first and resolve that one
         #format of action info is [["Action Name",speed],infomation needed for action]
         if player[0][1] >= npc[0][1]:
+            if player[0][0] == "Attack":
+                result = self.makeAttack(self.playerPokes[self.currentPokes[0]].attack(player[1]),target = self.enemyPokes[self.currentPokes[1]],)
+                if result == True:
+                    #do damage
+                    pass
+                else:
+                    #you missed
+                    pass
             pass
             #do player action first
         else:
@@ -248,6 +277,7 @@ class combat():
             print(f"Which pokemon would you like to swap for?")
 
 
+    
 
 
 def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalised fucntion to create pokemon objects of a given pokemon name (ie "Pikachu")
