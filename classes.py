@@ -39,10 +39,10 @@ def options(option=[],thingBeingChosen= ["noun","verb"]):
     while True:
         try:
             choice = int(input(toDisplay).strip())
-            if choice >= len(option):
+            if choice >= len(option) or choice < 0:
                 raise IndexError
             return choice
-        except TypeError or IndexError:
+        except (ValueError, IndexError):
             print("Not valid option")
             choice = None
 
@@ -275,6 +275,7 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
     if evolving == True:
         if old.givenName != old.actualname:
             given = old.givenName
+            
         stats[5] = old.attacks
     else:
         stats[5] = [stats[5]]
@@ -284,6 +285,8 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
                 stats[i][j] = int(stats[i][j])
         else:
             stats[i] = int(stats[i])
+    if stats[6] == "":
+        stats[6] = ["",100000]
     poke = pokemon(actualname=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],attacks=stats[5],evolutionInfo=stats[6],givenname=given)
     for i in range(0,stats[3]-1):
         poke.levelUp(force = True,ai = False)
