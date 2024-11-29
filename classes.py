@@ -30,7 +30,21 @@ def readFile(fileName,byIndex = False):
     file.close()
     return data
 
-
+def options(option=[],thingBeingChosen= ["noun","verb"]):
+    newLine = "\n"
+    check = ""
+    toDisplay = f"Pick the {thingBeingChosen[0]} to {thingBeingChosen[1]}{newLine}"
+    for i in range(0,len(option)):
+        toDisplay = toDisplay + f"{i} - {option[i]}{newLine}"
+    while True:
+        try:
+            choice = int(input(toDisplay).strip())
+            if choice >= len(option):
+                raise IndexError
+            return choice
+        except TypeError or IndexError:
+            print("Not valid option")
+            choice = None
 
 def setup():
     def makethetypesdict(fileName,type,dict={}):
@@ -46,7 +60,6 @@ def setup():
     pokeDatabase = {**waterTypes,**fireTypes,**grassTypes,**airTypes}
 
 setup()
-
 
 
 
@@ -84,76 +97,21 @@ class pokemon():
         if force == True:
             applyChanges()
             return
-        try:
-            if self.xp >= pokemon.XpThresholds[self.level-1]:
-                self.xp -= pokemon.XpThresholds[self.level-1]
-                #checks if xp is suffecient for level up, and applies it
-                applyChanges()
-                #increases all attributes by their relevant amount
-            if (self.level - 1) % 3 ==0:
-                if ai == True:
-                    self.addAttack(random = True) # they learn a new attack every 3 levels, meaning they will have 6 by the end
-                else:
-                    self.addAttack()           
-            if self.level >= int(self.evolutionInfo[1]):
-                print(f"{self.givenName} is evolving into a {self.evolutionInfo[0]}")
-                self.evolve()
-        except:
-            pass
+        if self.xp >= pokemon.XpThresholds[self.level-1]:
+            self.xp -= pokemon.XpThresholds[self.level-1]
+            #checks if xp is suffecient for level up, and applies it
+            applyChanges()
+            #increases all attributes by their relevant amount
+        if (self.level - 1) % 3 ==0:
+            if ai == True:
+                self.addAttack(True) # they learn a new attack every 3 levels, meaning they will have 6 by the end
+            else:
+                self.addAttack()           
+        if self.level >= int(self.evolutionInfo[1]):
+            print(f"{self.givenName} is evolving into a {self.evolutionInfo[0]}")
+            self.evolve()
     
-    def addAttack(self):
-        def removeDuplicates(current,new):
-            output = [] # used to check for duplicate attacks (already learned)
-            for i in range(0,len(new)):
-                if not new[i] in current:
-                    output.append(new[i])
-            return output
-        print(f"{self.givenName} can learn a new move")
-        file = self.type + "Moves.txt"
-        data = readFile(file,True)
-        avalible = []
-        for i in data.keys():
-            if i <= self.level:
-                try:
-                    for j in data[i]:
-                        avalible.append(j)
-                except:
-                    avalible.append(data[i]) # makes a list of attack availible to learn
-        avalible = removeDuplicates(self.attacks,avalible)
-        newLine = "\n"
-        toDisplay = f"Pick the move {self.givenName} will learn: {newLine}"
-        for i in range(0,len(avalible)):
-            toDisplay = toDisplay + f"{i} - {avalible[i]}{newLine}"
-        if len(self.attacks) >= 6:
-            toShow = ""
-            for i in self.attacks[0:3]:
-                toShow = toShow + i + ", "
-            toShow = toShow + self.attacks[4] + " and " + self.attacks[5]
-            choice = input(f"Currently {self.givenName} has {toShow}. Would you like you like to replace an attack? Y/N {newLine}")
-            while True:
-                if choice.lower() == "n":
-                    print(f"{self.givenName} will keep their current attacks")
-                    return
-                elif choice.lower() == "y":
-                    break
-                else:
-                    choice = input("That was not a valid option, would you like to replace an attack? Y/N \n")
-            while True:
-                try:
-                    replace = input("Which attack would you like to replace \n").strip().lower()
-                    self.attacks.remove(replace.title())
-                    break
-                except:
-                    print(f"{self.givenName} does not have that move, they have {toShow}.")
-        while True:
-            try:
-                chosen = int(input(toDisplay))
-                break
-            except:
-                print("Enter the integer that corresponds with the attack")
-        self.attacks.append(avalible[chosen])
-
-    def addAttack(self,random = True): # this is an alternate version for the ai to use when making pokemon that picks new attacks randomly
+    def addAttack(self,npc = False):
         def removeDuplicates(current,new):
             output = [] # used to check for duplicate attacks (already learned)
             for i in range(0,len(new)):
@@ -168,13 +126,43 @@ class pokemon():
                 try:
                     for j in data[i]:
                         avalible.append(j)
-                except:
+                except AttributeError:
                     avalible.append(data[i]) # makes a list of attack availible to learn
-        avalible = removeDuplicates(self.attacks,avalible)
-        if len(self.attacks) >= 6:
-            self.attacks.pop(0)
-        chosen = random.randint(0,len(avalible))
-        self.attacks.append(avalible[chosen])
+            avalible = removeDuplicates(self.attacks,avalible)
+        if npc == True:
+            
+            if len(self.attacks) >= 6:
+                self.attacks.pop(0)
+            chosen = random.randint(0,len(avalible))
+            self.attacks.append(avalible[chosen])
+            return
+        else: 
+            print(f"{self.givenName} can learn a new move")
+            
+            newLine = "\n"
+            if len(self.attacks) >= 6:
+                toShow = ""
+                for i in self.attacks[0:3]:
+                    toShow = toShow + i + ", "
+                toShow = toShow + self.attacks[4] + " and " + self.attacks[5]
+                choice = input(f"Currently {self.givenName} has {toShow}. Would you like you like to replace an attack? Y/N {newLine}")
+                while True:
+                    if choice.lower() == "n":
+                        print(f"{self.givenName} will keep their current attacks")
+                        return
+                    elif choice.lower() == "y":
+                        break
+                    else:
+                        choice = input("That was not a valid option, would you like to replace an attack? Y/N \n")
+                while True:
+                    try:
+                        replace = input("Which attack would you like to replace \n").strip().lower()
+                        self.attacks.remove(replace.title())
+                        break
+                    except ValueError:
+                        print(f"{self.givenName} does not have that move, they have {toShow}.")
+            chosen = options(avalible,["attack", "learn"])
+            self.attacks.append(avalible[chosen])
 
     def attack(self,choice):
         attack = self.attacks[choice]
@@ -183,8 +171,6 @@ class pokemon():
     
     def evolve(self):
         self.__dict__ = createPoke(pokeName=self.evolutionInfo[0],evolving=True,old = self).__dict__
-
-
 
 
 
@@ -283,14 +269,12 @@ class combat():
 def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalised fucntion to create pokemon objects of a given pokemon name (ie "Pikachu")
     type = pokeDatabase[pokeName]
     stats = readFile(type + "Pokes.txt")[pokeName]
-    print(stats)
     xp = old.xp
     while len(stats) < 7:
         stats.append(None)
     if evolving == True:
         if old.givenName != old.actualname:
             given = old.givenName
-            print("names don't mathc")
         stats[5] = old.attacks
     else:
         stats[5] = [stats[5]]
@@ -300,11 +284,8 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
                 stats[i][j] = int(stats[i][j])
         else:
             stats[i] = int(stats[i])
-    print(stats[6])
     poke = pokemon(actualname=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],attacks=stats[5],evolutionInfo=stats[6],givenname=given)
     for i in range(0,stats[3]-1):
-        poke.levelUp(force = True)
+        poke.levelUp(force = True,ai = False)
     poke.xp = xp
-    print(poke.givenName)
-    print(poke.hp)
     return poke
