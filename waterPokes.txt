@@ -1,5 +1,5 @@
 Wooper:20;15;15;1;4,3,3;Bubble;Quagsire,10
-Quagsire:25;10;10;10;5,2,3;;;
+Quagsire:25;10;10;10;5,2,3;;
 Mudkip:10;20;20;1;3,3,4;Splash;Marshtomp,6
 Marshtomp:15;15;20;6;3,3,4;;Swampert,12
-Swampert:15;15;20;12;4,3,3;;;
+Swampert:15;15;20;12;4,3,3;

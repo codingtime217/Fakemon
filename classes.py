@@ -180,7 +180,7 @@ class pokemon():
 
 
 class character():
-    def __init__(self,pokemon ={},level=0,name = "TestyMcTestFace"):
+    def __init__(self,pokemon =[],level=0,name = "TestyMcTestFace"):
         self.pokemon = pokemon
         self.level = level
         self.name = name
@@ -188,10 +188,15 @@ class character():
 
 
 class combat():
-    def __init__(self,playerPs=character(),enemyPs=character(),currentPs=[0,0]):
+    def __init__(self,playerPs=character(),enemyPs=character()):
         self.playerPokes = playerPs.pokemon # these will only store none fainted pokemon, fainted pokemon will be removed
         self.enemyPokes = enemyPs.pokemon
-        self.currentPokes = currentPs # note, first number will be player index, 2nd will be enemy
+        availible = [x.givenName for x in self.playerPokes]
+        starter = options(availible,["pokemon" , "send out"])
+        self.currentPokes = [starter,0] #first is player, 2nd is enemys
+        
+
+        
 
     def makeAttack(self,attackInfo,target):
         hitchance = (attackInfo[1] + target.dodge) / 2
@@ -215,13 +220,13 @@ class combat():
                 #player lost end combat
                 pass
             else:
-                self.remaingPlayerPokes.pop(self.currentPokes[0])
+                self.playerPokes.pop(self.currentPokes[0])
             pass
             #player fainting - select replacement
         elif self.enemyPokes[self.currentPokes[1]].hp["current"] <= 0:
             #enemey fainted - select replacement
             if len(self.enemyPokes) == 0:
-                #player lost end combat
+                #player lost end combatr
                 pass
             else:
                 self.remaingEnemyPokes.pop(self.currentPokes[1])
@@ -246,6 +251,8 @@ class combat():
                 else:
                     #you missed
                     pass
+            elif player[0][0] == "Skip Turn":
+                pass #skip the turn
             pass
             #do player action first
         else:
@@ -256,11 +263,13 @@ class combat():
     def swapPoke(self,who = None):
         #swapout the currently selected pokemon
         if who == "npc":
-            scores = [x.hp for x in self.enemyPokes]
-            index = index(max(scores))
-            self.currentPokes[1] = index
+            scores = [x.hp["current"] for x in self.enemyPokes]
+            swapIn = scores.index(max(scores))
+            self.currentPokes[1] = swapIn
         else:
-            print(f"Which pokemon would you like to swap for?")
+            availible = [x.givenName for x in self.playerPokes]
+            swapIn = options(availible,["pokemon" , "swap in"])
+            self.currentPokes[0] = swapIn
 
 
     
@@ -292,3 +301,8 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
         poke.levelUp(force = True,ai = False)
     poke.xp = xp
     return poke
+
+player = character([createPoke("Wooper"),createPoke("Mudkip"),createPoke("Quagsire")])
+enemy = character([createPoke("Mudkip"),createPoke("Wooper")],0,"Enemy Man")
+fight = combat(player,enemy)
+fight.swapPoke()
