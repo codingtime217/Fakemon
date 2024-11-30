@@ -1,33 +1,34 @@
 import random
+import glob
 
 def readFile(fileName,byIndex = False):
-    file = open(fileName,"rt")#reads file in accordance to how I set it up
-    data = {}
-    
-    for line in file:
-        info = line.split(":")
-        info[1] = info[1].strip("\n")
-        info[1] = info[1].split(";")
-        for i in range(0,len(info[1])):
-            if "," in info[1][i]:
-                info[1][i] = info[1][i].split(",")
+    path = glob.glob(f"Data/{fileName}",recursive=True)[0] # find the path to the file with glob - allows me to put them in a folder
+    with open(path,"r") as file: #reads file in accordance to how I set it up, using with to ensure it is closed
+        data = {}
+        
+        for line in file:
+            info = line.split(":")
+            info[1] = info[1].strip("\n")
+            info[1] = info[1].split(";")
+            for i in range(0,len(info[1])):
+                if "," in info[1][i]:
+                    info[1][i] = info[1][i].split(",")
 
-        if byIndex == False:
-            if "," in info[0]:          
+            if byIndex == False:
+                if "," in info[0]:          
+                    info[0] = info[0].split(",")
+                    data[info[0][0]] = info[1]
+                else:
+                    data[info[0]] = info[1]    
+                #turns the file into a dictionary based on the name of each record
+            else:
                 info[0] = info[0].split(",")
-                data[info[0][0]] = info[1]
-            else:
-                data[info[0]] = info[1]    
-            #turns the file into a dictionary based on the name of each record
-        else:
-            info[0] = info[0].split(",")
-            info[0][1] = int(info[0][1])
-            if info[0][1] not in data.keys():
-                data[info[0][1]] = [info[0][0]]
-            else:
-                data[info[0][1]].append(info[0][0])
-            #turns the file into a dictionary based on the number attached to each record
-    file.close()
+                info[0][1] = int(info[0][1])
+                if info[0][1] not in data.keys():
+                    data[info[0][1]] = [info[0][0]]
+                else:
+                    data[info[0][1]].append(info[0][0])
+                #turns the file into a dictionary based on the number attached to each record
     return data
 
 def options(option=[],thingBeingChosen= ["noun","verb"]):
@@ -47,11 +48,11 @@ def options(option=[],thingBeingChosen= ["noun","verb"]):
             choice = None
 
 def setup():
-    def makethetypesdict(fileName,type,dict={}):
-        list = readFile(fileName)
-        for i in list.keys():
-            dict[i] = type
-        return dict
+    def makethetypesdict(fileName,type):
+        dictionary = readFile(fileName)
+        for i in dictionary.keys():
+            dictionary[i] = type
+        return dictionary
     waterTypes = makethetypesdict("waterPokes.txt","water")
     fireTypes = {}
     grassTypes = {}
@@ -206,8 +207,8 @@ class combat():
             return False
 
     def oneRound(self):
-        player = self.playerAction()
-        npc = self.npcAction()
+        player = self.playerDecide()
+        npc = self.npcDecide()
         self.resolve(player,npc)
         #pick npc attack
         #choose player action
@@ -238,7 +239,7 @@ class combat():
                 self.swapPoke(npc=True)
         pass
 
-    def playerAction(self):
+    def playerDecide(self):
         #choose player action
         while True:
             choice = options(["Choose an attack","View your Pokemon", "Swap Pokemon"],["action", "take"])
@@ -253,14 +254,12 @@ class combat():
 
         pass
 
-    def npcAction(self):
+    def npcDecide(self):
         #determine the AI's action
-        return None
+        return [["Skip turn",100],]
         pass
     def resolve(self,player=[["Skip Turn",100],],npc = [["Skip Turn",100],]):
-        #determine whose action goes first and resolve that one
-        #format of action info is [["Action Name",speed],infomation needed for action]
-        if player[0][1] >= npc[0][1]:
+        def playerAction(player = [[["Skip Turn",100],]]):
             if player[0][0] == "Attack":
                 result = self.makeAttack(self.playerPokes[self.currentPokes[0]].attack(player[1]),target = self.enemyPokes[self.currentPokes[1]],)
                 if result == True:
@@ -269,13 +268,24 @@ class combat():
                 else:
                     #you missed
                     pass
-            elif player [0][1] == "Swap":
+            elif player[0][0] == "Swap":
                 self.swapPoke()
             elif player[0][0] == "Skip Turn":
                 pass #skip the turn
             pass
             #do player action first
+        
+        def npcAction():
+            #resolve npc actions
+            pass
+        #determine whose action goes first and resolve that one
+        #format of action info is [["Action Name",speed],infomation needed for action]
+        if player[0][1] >= npc[0][1]:
+            playerAction(player)
+            npcAction()
         else:
+            npcAction()
+            playerAction(player)
             pass
             #do npc action first
         pass
@@ -322,7 +332,7 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
     poke.xp = xp
     return poke
 
-player = character([createPoke("Wooper"),createPoke("Mudkip"),createPoke("Quagsire")])
-enemy = character([createPoke("Mudkip"),createPoke("Wooper")],0,"Enemy Man")
-fight = combat(player,enemy)
-fight.swapPoke()
+# player = character([createPoke("Wooper"),createPoke("Mudkip"),createPoke("Quagsire")])
+# enemy = character([createPoke("Mudkip"),createPoke("Wooper")],0,"Enemy Man")
+# fight = combat(player,enemy)
+# fight.oneRound()
