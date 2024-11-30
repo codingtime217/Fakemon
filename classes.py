@@ -216,28 +216,46 @@ class combat():
         #process status effects
         #check for fainting
         if self.playerPokes[self.currentPokes[0]].hp["current"] <= 0:
+            print(f"{self.playerPokes[self.currentPokes[0]].actualname} has fainted!")
             if len(self.playerPokes) == 0:
                 #player lost end combat
+                print("You lost lol")
                 pass
             else:
+                
                 self.playerPokes.pop(self.currentPokes[0])
+                self.swapPoke()
             pass
             #player fainting - select replacement
         elif self.enemyPokes[self.currentPokes[1]].hp["current"] <= 0:
             #enemey fainted - select replacement
+            print(f"The opponenet's {self.enemyPokesPokes[self.currentPokes[1]].actualname} has fainted!")
             if len(self.enemyPokes) == 0:
-                #player lost end combatr
+                #player won end combat
                 pass
             else:
                 self.remaingEnemyPokes.pop(self.currentPokes[1])
+                self.swapPoke(npc=True)
         pass
 
     def playerAction(self):
         #choose player action
+        while True:
+            choice = options(["Choose an attack","View your Pokemon", "Swap Pokemon"],["action", "take"])
+            if choice == 0:
+                #choose the attack
+                pass
+            elif choice == 1:
+                #show them their pokemone
+                pass
+            elif choice == 2:
+                return [["Swap",50],] #swap pokemon
+
         pass
 
     def npcAction(self):
         #determine the AI's action
+        return None
         pass
     def resolve(self,player=[["Skip Turn",100],],npc = [["Skip Turn",100],]):
         #determine whose action goes first and resolve that one
@@ -251,6 +269,8 @@ class combat():
                 else:
                     #you missed
                     pass
+            elif player [0][1] == "Swap":
+                self.swapPoke()
             elif player[0][0] == "Skip Turn":
                 pass #skip the turn
             pass
