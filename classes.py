@@ -59,6 +59,8 @@ def setup():
     airTypes = {}
     global pokeDatabase
     pokeDatabase = {**waterTypes,**fireTypes,**grassTypes,**airTypes}
+    global typeMatrix
+    typeMatrix = {"water": "fire","fire":"grass","grass":"air","air":"water"}
 
 setup()
 
@@ -68,7 +70,7 @@ setup()
 
 class pokemon():
     XpThresholds = [1000, 1090, 1188, 1295, 1412000, 1090, 1188, 1295, 1412, 1539, 1677, 1828, 1993, 2172, 2367, 2580, 2813, 3066, 3342, 3642, 3970, 4328, 4717, 5142] #xp thresholds for each level up
-    def __init__(self,actualname = "",hp=1,dodge = 5,speed = 0,xp=0,level =1,scaleing = [1,1,1],attacks = None,type=None,evolutionInfo = None,givenname = ""):
+    def __init__(self,actualname = "",hp=1,dodge = 5,speed = 0,xp=0,level =1,scaleing = [1,1,1],Attacks = None,type=None,evolutionInfo = None,givenname = ""):
         self.hp = {"current":hp,"max":hp}
         self.actualname = actualname
         if givenname == "":
@@ -81,7 +83,7 @@ class pokemon():
         self.xp = xp
         self.level = level
         self.scaleing = scaleing
-        self.attacks = attacks
+        self.Attacks = Attacks
         self.evolutionInfo = evolutionInfo
         if self.evolutionInfo == None:
             self.evolutionInfo == [None,1000000]
@@ -129,27 +131,27 @@ class pokemon():
                         avalible.append(j)
                 except AttributeError:
                     avalible.append(data[i]) # makes a list of attack availible to learn
-            avalible = removeDuplicates(self.attacks,avalible)
+            avalible = removeDuplicates(self.Attacks,avalible)
         if npc == True:
             
-            if len(self.attacks) >= 6:
-                self.attacks.pop(0)
+            if len(self.Attacks) >= 6:
+                self.Attacks.pop(0)
             chosen = random.randint(0,len(avalible))
-            self.attacks.append(avalible[chosen])
+            self.Attacks.append(avalible[chosen])
             return
         else: 
             print(f"{self.givenName} can learn a new move")
             
             newLine = "\n"
-            if len(self.attacks) >= 6:
+            if len(self.Attacks) >= 6:
                 toShow = ""
-                for i in self.attacks[0:3]:
+                for i in self.Attacks[0:3]:
                     toShow = toShow + i + ", "
-                toShow = toShow + self.attacks[4] + " and " + self.attacks[5]
+                toShow = toShow + self.Attacks[4] + " and " + self.Attacks[5]
                 choice = input(f"Currently {self.givenName} has {toShow}. Would you like you like to replace an attack? Y/N {newLine}")
                 while True:
                     if choice.lower() == "n":
-                        print(f"{self.givenName} will keep their current attacks")
+                        print(f"{self.givenName} will keep their current Attacks")
                         return
                     elif choice.lower() == "y":
                         break
@@ -158,16 +160,18 @@ class pokemon():
                 while True:
                     try:
                         replace = input("Which attack would you like to replace \n").strip().lower()
-                        self.attacks.remove(replace.title())
+                        self.Attacks.remove(replace.title())
                         break
                     except ValueError:
                         print(f"{self.givenName} does not have that move, they have {toShow}.")
             chosen = options(avalible,["attack", "learn"])
-            self.attacks.append(avalible[chosen])
+            self.Attacks.append(avalible[chosen])
 
     def attack(self,choice):
-        attack = self.attacks[choice]
-        data = readFile(self.type + "Moves.txt")[attack][1]
+        attack = self.Attacks[choice]
+        data = readFile(self.type + "Moves.txt")[attack]
+        data = [int(i) for i in data]
+        print(data)
         return data
     
     def evolve(self):
@@ -195,6 +199,8 @@ class combat():
         availible = [x.givenName for x in self.playerPokes]
         starter = options(availible,["pokemon" , "send out"])
         self.currentPokes = [starter,0] #first is player, 2nd is enemys
+        self.activePlayer = self.playerPokes[self.currentPokes[0]]
+        self.activeEnemy = self.enemyPokes[self.currentPokes[1]]
         
 
         
@@ -202,11 +208,12 @@ class combat():
     def makeAttack(self,attackInfo,target):
         hitchance = (attackInfo[1] + target.dodge) / 2
         if random.randint(1,101) <= hitchance:
-            return True
+            return attackInfo[0]
         else:
-            return False
+            return 0
 
     def oneRound(self):
+        
         player = self.playerDecide()
         npc = self.npcDecide()
         self.resolve(player,npc)
@@ -216,9 +223,9 @@ class combat():
         #resolve
         #process status effects
         #check for fainting
-        if self.playerPokes[self.currentPokes[0]].hp["current"] <= 0:
+        if self.activePlayer.hp["current"] <= 0:
             print(f"{self.playerPokes[self.currentPokes[0]].actualname} has fainted!")
-            if len(self.playerPokes) == 0:
+            if len(self.playerPokes) == 1:
                 #player lost end combat
                 print("You lost lol")
                 pass
@@ -228,14 +235,14 @@ class combat():
                 self.swapPoke()
             pass
             #player fainting - select replacement
-        elif self.enemyPokes[self.currentPokes[1]].hp["current"] <= 0:
+        elif self.activeEnemy.hp["current"] <= 0:
             #enemey fainted - select replacement
-            print(f"The opponenet's {self.enemyPokesPokes[self.currentPokes[1]].actualname} has fainted!")
-            if len(self.enemyPokes) == 0:
+            print(f"The opponenet's {self.activeEnemy.actualname} has fainted!")
+            if len(self.enemyPokes) == 1:
                 #player won end combat
                 pass
             else:
-                self.remaingEnemyPokes.pop(self.currentPokes[1])
+                self.enemyPokes.pop(self.currentPokes[1])
                 self.swapPoke(npc=True)
         pass
 
@@ -245,6 +252,12 @@ class combat():
             choice = options(["Choose an attack","View your Pokemon", "Swap Pokemon"],["action", "take"])
             if choice == 0:
                 #choose the attack
+                chosenAttack = options(["Cancel Attack"]+self.activePlayer.Attacks,["attack","use"])
+                if chosenAttack == 0:
+                    continue
+                else:
+                    attack = self.activePlayer.attack(chosenAttack-1)
+                    return [["Attack",self.activePlayer.speed],attack]
                 pass
             elif choice == 1:
                 #show them their pokemone
@@ -261,12 +274,21 @@ class combat():
     def resolve(self,player=[["Skip Turn",100],],npc = [["Skip Turn",100],]):
         def playerAction(player = [[["Skip Turn",100],]]):
             if player[0][0] == "Attack":
-                result = self.makeAttack(self.playerPokes[self.currentPokes[0]].attack(player[1]),target = self.enemyPokes[self.currentPokes[1]],)
-                if result == True:
+                result = self.makeAttack(player[1],target = self.activeEnemy)
+                if result != 0:
                     #do damage
+                    damage = result
+                    if typeMatrix[self.activePlayer.type] == self.activeEnemy.type:
+                        #it was super effective so do more damage + tell the player to trigger the dopamine
+                        damage *= 2
+                        print(f"")
+                    else:
+                        #deal damage normally
+                        pass
                     pass
                 else:
-                    #you missed
+                    print("You missed lol")
+                    #you missed       
                     pass
             elif player[0][0] == "Swap":
                 self.swapPoke()
@@ -274,12 +296,14 @@ class combat():
                 pass #skip the turn
             pass
             #do player action first
-        
-        def npcAction():
+        def npcAction(npc):
+            if npc[0][0] == "Swap":
+                self.swapPoke("npc")
             #resolve npc actions
             pass
         #determine whose action goes first and resolve that one
         #format of action info is [["Action Name",speed],infomation needed for action]
+
         if player[0][1] >= npc[0][1]:
             playerAction(player)
             npcAction()
@@ -296,11 +320,12 @@ class combat():
             scores = [x.hp["current"] for x in self.enemyPokes]
             swapIn = scores.index(max(scores))
             self.currentPokes[1] = swapIn
+            self.activeEnemy = self.enemyPokes[self.currentPokes[1]]
         else:
             availible = [x.givenName for x in self.playerPokes]
             swapIn = options(availible,["pokemon" , "swap in"])
             self.currentPokes[0] = swapIn
-
+            self.activePlayer = self.playerPokes[self.currentPokes[0]]
 
     
 
@@ -315,7 +340,7 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
         if old.givenName != old.actualname:
             given = old.givenName
             
-        stats[5] = old.attacks
+        stats[5] = old.Attacks
     else:
         stats[5] = [stats[5]]
     for i in range(0,5):
@@ -326,13 +351,12 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
             stats[i] = int(stats[i])
     if stats[6] == "":
         stats[6] = ["",100000]
-    poke = pokemon(actualname=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],attacks=stats[5],evolutionInfo=stats[6],givenname=given)
+    poke = pokemon(actualname=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],Attacks=stats[5],evolutionInfo=stats[6],givenname=given)
     for i in range(0,stats[3]-1):
         poke.levelUp(force = True,ai = False)
     poke.xp = xp
     return poke
 
-# player = character([createPoke("Wooper"),createPoke("Mudkip"),createPoke("Quagsire")])
-# enemy = character([createPoke("Mudkip"),createPoke("Wooper")],0,"Enemy Man")
-# fight = combat(player,enemy)
-# fight.oneRound()
+player = character([createPoke("Wooper"),createPoke("Mudkip"),createPoke("Quagsire")])
+enemy = character([createPoke("Mudkip"),createPoke("Wooper")],0,"Enemy Man")
+fight = combat(player,enemy)
