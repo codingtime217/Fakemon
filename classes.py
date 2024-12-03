@@ -205,9 +205,9 @@ class combat():
 
         
 
-    def makeAttack(self,attackInfo,target):
+    def makeAttack(self,attackInfo,target,hit = False):
         hitchance = (attackInfo[1] + target.dodge) / 2
-        if random.randint(1,101) <= hitchance:
+        if random.randint(1,101) <= hitchance or hit == True:
             return attackInfo[0]
         else:
             return 0
@@ -215,14 +215,13 @@ class combat():
     def oneRound(self):
         
         player = self.playerDecide()
+        #let player choose their action
         npc = self.npcDecide()
+        #npc determines actions
         self.resolve(player,npc)
-        #pick npc attack
-        #choose player action
-        #determine resolution order
-        #resolve
-        #process status effects
-        #check for fainting
+        #resolve actions in the correct order
+
+        #then check for fainting and who won
         if self.activePlayer.hp["current"] <= 0:
             print(f"{self.playerPokes[self.currentPokes[0]].actualname} has fainted!")
             if len(self.playerPokes) == 1:
@@ -249,7 +248,7 @@ class combat():
     def playerDecide(self):
         #choose player action
         while True:
-            choice = options(["Choose an attack","View your Pokemon", "Swap Pokemon"],["action", "take"])
+            choice = options(["Choose an attack","View Active Pokemon","View your Pokemon", "Swap Pokemon"],["action", "take"])
             if choice == 0:
                 #choose the attack
                 chosenAttack = options(["Cancel Attack"]+self.activePlayer.Attacks,["attack","use"])
@@ -257,66 +256,72 @@ class combat():
                     continue
                 else:
                     attack = self.activePlayer.attack(chosenAttack-1)
-                    return [["Attack",self.activePlayer.speed],attack]
-                pass
+                    return [["Attack",self.activePlayer.speed],attack,self.activePlayer.Attacks[chosenAttack-1]]
             elif choice == 1:
-                #show them their pokemone
+                message = """
+Your Active Pokemon:
+{player.givenName}: HP = {player.hp[current]}/{player.hp[max]}, Dodge = {player.dodge}, Speed = {player.speed} Type = {player.type}
+
+Their Active Pokemon:
+{opponent.givenName}: HP = {opponent.hp[current]}/{opponent.hp[max]}, Dodge = {opponent.dodge}, Speed = {opponent.speed} Type = {opponent.type}
+"""
+                print(message.format(player = self.activePlayer,opponent = self.activeEnemy))
+                #show them info about pokemon currently out, both player and enemy
                 pass
             elif choice == 2:
-                return [["Swap",50],] #swap pokemon
-
+                #show them their pokemone
+                pass
+            elif choice == 3:
+                return [["Swap",50],] #swap pokemo
+                
         pass
 
     def npcDecide(self):
         #determine the AI's action
         return [["Skip turn",100],]
         pass
+
+
     def resolve(self,player=[["Skip Turn",100],],npc = [["Skip Turn",100],]):
-        def playerAction(player = [[["Skip Turn",100],]]):
+        def action(player, pokemon, opponent, npc = False) : # resolves actions
+            message = f"{pokemon.givenName} choose to {player[0][0]}"
             if player[0][0] == "Attack":
-                result = self.makeAttack(player[1],target = self.activeEnemy)
+                result = self.makeAttack(player[1],opponent,True)
+                message = message + f" with {player[2]}."
                 if result != 0:
                     #do damage
                     damage = result
-                    if typeMatrix[self.activePlayer.type] == self.activeEnemy.type:
+                    message = message + f"They hit {self.activeEnemy}"
+                    if typeMatrix[pokemon.type] == opponent.type:
                         #it was super effective so do more damage + tell the player to trigger the dopamine
                         damage *= 2
-                        print(f"")
-                    else:
-                        #deal damage normally
-                        pass
+                        message = message + " It was super effective!"
+                    opponent.hp["current"] -= damage
                     pass
                 else:
-                    print("You missed lol")
+                    message = message +f" {opponent.givenName} dodged it"
                     #you missed       
-                    pass
             elif player[0][0] == "Swap":
-                self.swapPoke()
+                self.swapPoke(npc)
             elif player[0][0] == "Skip Turn":
                 pass #skip the turn
-            pass
-            #do player action first
-        def npcAction(npc):
-            if npc[0][0] == "Swap":
-                self.swapPoke("npc")
-            #resolve npc actions
             pass
         #determine whose action goes first and resolve that one
         #format of action info is [["Action Name",speed],infomation needed for action]
 
         if player[0][1] >= npc[0][1]:
-            playerAction(player)
-            npcAction()
+            action(player,self.activePlayer,self.activeEnemy)
+            action(npc,self.activeEnemy,self.activePlayer,True)
         else:
-            npcAction()
-            playerAction(player)
+            action(npc,self.activeEnemy,self.activePlayer,True)
+            action(player,self.activePlayer,self.activeEnemy)
             pass
             #do npc action first
         pass
 
-    def swapPoke(self,who = None):
+    def swapPoke(self,npc = False):
         #swapout the currently selected pokemon
-        if who == "npc":
+        if npc == True:
             scores = [x.hp["current"] for x in self.enemyPokes]
             swapIn = scores.index(max(scores))
             self.currentPokes[1] = swapIn
@@ -357,6 +362,10 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
     poke.xp = xp
     return poke
 
-player = character([createPoke("Wooper"),createPoke("Mudkip"),createPoke("Quagsire")])
+you = character([createPoke("Wooper"),createPoke("Mudkip"),createPoke("Squirtle")])
 enemy = character([createPoke("Mudkip"),createPoke("Wooper")],0,"Enemy Man")
-fight = combat(player,enemy)
+fight = combat(you,enemy)
+fight.oneRound()
+fight.oneRound()
+fight.oneRound()
+fight.oneRound()
