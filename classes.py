@@ -206,7 +206,7 @@ class combat():
         
 
     def makeAttack(self,attackInfo,target,hit = False):
-        hitchance = (attackInfo[1] + target.dodge) / 2
+        hitchance = (attackInfo[1] - target.dodge) / 2
         if random.randint(1,101) <= hitchance or hit == True:
             return attackInfo[0]
         else:
@@ -278,6 +278,7 @@ Their Active Pokemon:
 
     def npcDecide(self):
         #determine the AI's action
+        #calculate a weight for all of its possible actions then choose that, note, the ai will only swap when one of its poke's faints
         return [["Skip turn",100],]
         pass
 

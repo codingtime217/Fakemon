@@ -1,0 +1,11 @@
+Charmander:15;20;15;1;3,3,4;Firebolt;Charmeleon,6
+Charmeleon:20;15;15;6;4,3,3;;Charizard,12
+Charizard:25;10;15;12;5,2,3;;
+Vulpix:10;20;20;1;2,4,4;Ember;Ninetales,10
+Ninetales:15;20;15;2,4,4;;
+Cyndaquil:15;20;15;1;3,4,3;Ember;Quilava,6
+Quilava:20;15;15;6;3,4,3;;Typhlosion,12
+Typhlosion:20;15;15;12;4,3,3;;
+Torchic:10;25;15;1;2,4,4;Firebolt;Combusken,6
+Combusken:15,20,15;6;3,4,3;;Blaziken,12
+Blaziken:15,20,15;12;3,4,3;;
