@@ -54,7 +54,7 @@ def setup():
             dictionary[i] = type
         return dictionary
     waterTypes = makethetypesdict("waterPokes.txt","water")
-    fireTypes = {}
+    fireTypes = makethetypesdict("firePokes.txt","fire")
     grassTypes = {}
     airTypes = {}
     global pokeDatabase
@@ -171,7 +171,6 @@ class pokemon():
         attack = self.Attacks[choice]
         data = readFile(self.type + "Moves.txt")[attack]
         data = [int(i) for i in data]
-        print(data)
         return data
     
     def evolve(self):
@@ -185,10 +184,14 @@ class pokemon():
 
 
 class character():
-    def __init__(self,pokemon =[],level=0,name = "TestyMcTestFace"):
+    def __init__(self,pokemon =[],avglevel=0,name = "TestyMcTestFace",generatePokes = False,noOfPokes = 1):
         self.pokemon = pokemon
-        self.level = level
+        self.avgLevel = avglevel
         self.name = name
+        types = ["fire","water","air","grass"]
+        if generatePokes == True:
+            for i in range(0,noOfPokes):
+                type = types[random.randint(0,4)]
 
 
 
@@ -206,8 +209,9 @@ class combat():
         
 
     def makeAttack(self,attackInfo,target,hit = False):
-        hitchance = (attackInfo[1] - target.dodge) / 2
-        if random.randint(1,101) <= hitchance or hit == True:
+        hitchance = (attackInfo[1] - target.dodge)
+        print(hitchance)
+        if random.randint(1,100) <= hitchance or hit == True:
             return attackInfo[0]
         else:
             return 0
@@ -227,7 +231,7 @@ class combat():
             if len(self.playerPokes) == 1:
                 #player lost end combat
                 print("You lost lol")
-                pass
+                return False
             else:
                 
                 self.playerPokes.pop(self.currentPokes[0])
@@ -239,7 +243,7 @@ class combat():
             print(f"The opponenet's {self.activeEnemy.actualname} has fainted!")
             if len(self.enemyPokes) == 1:
                 #player won end combat
-                pass
+                return True
             else:
                 self.enemyPokes.pop(self.currentPokes[1])
                 self.swapPoke(npc=True)
@@ -285,24 +289,29 @@ Their Active Pokemon:
 
     def resolve(self,player=[["Skip Turn",100],],npc = [["Skip Turn",100],]):
         def action(player, pokemon, opponent, npc = False) : # resolves actions
-            message = f"{pokemon.givenName} choose to {player[0][0]}"
+            message = f"{pokemon.givenName} is going to {player[0][0]}"
             if player[0][0] == "Attack":
-                result = self.makeAttack(player[1],opponent,True)
+                result = self.makeAttack(player[1],opponent)
                 message = message + f" with {player[2]}."
                 if result != 0:
                     #do damage
                     damage = result
-                    message = message + f"They hit {self.activeEnemy}"
+                    message = message + f" They hit {opponent.givenName}."
                     if typeMatrix[pokemon.type] == opponent.type:
                         #it was super effective so do more damage + tell the player to trigger the dopamine
                         damage *= 2
                         message = message + " It was super effective!"
+                    elif opponent.type == pokemon.type:
+                        damage = round(damage / 2)
+                        message = message + " It wasn't very effective"
                     opponent.hp["current"] -= damage
-                    pass
+                    
                 else:
                     message = message +f" {opponent.givenName} dodged it"
                     #you missed       
+                print(message)
             elif player[0][0] == "Swap":
+                print(message)
                 self.swapPoke(npc)
             elif player[0][0] == "Skip Turn":
                 pass #skip the turn
@@ -327,6 +336,7 @@ Their Active Pokemon:
             swapIn = scores.index(max(scores))
             self.currentPokes[1] = swapIn
             self.activeEnemy = self.enemyPokes[self.currentPokes[1]]
+            print(f"{self.activeEnemy.givenName} was sent out by the opponenet")
         else:
             availible = [x.givenName for x in self.playerPokes]
             swapIn = options(availible,["pokemon" , "swap in"])
@@ -364,9 +374,8 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
     return poke
 
 you = character([createPoke("Wooper"),createPoke("Mudkip"),createPoke("Squirtle")])
-enemy = character([createPoke("Mudkip"),createPoke("Wooper")],0,"Enemy Man")
+enemy = character([createPoke("Charmander"),createPoke("Wooper")],0,"Enemy Man")
 fight = combat(you,enemy)
-fight.oneRound()
-fight.oneRound()
-fight.oneRound()
-fight.oneRound()
+result = "None"
+while result != True and result != False:
+    result = fight.oneRound()
