@@ -180,9 +180,6 @@ class pokemon():
 
 
 
-
-
-
 class character():
     def __init__(self,pokemon =[],avglevel=0,name = "TestyMcTestFace",generatePokes = False,noOfPokes = 1):
         self.pokemon = pokemon

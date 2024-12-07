@@ -1,0 +1,11 @@
+Bulbasaur:20;15;15;1;4,3,3;Spore;Ivysaur,6
+Ivysaur:20;15;15;6;4,3,3;;Venasaur,12
+Venasaur:30;10;10;4,3,3;;
+Tangela:15;20;15;1;3,4,3;Razor Leaf; Tangrowth,10
+Tangrowth:20;15;15;10,4,3,3;;
+Turtwig:20;15;15;1;5,3,2;Spore;Gortle,6
+Grotle:25;25;10;10;6;5,3,2;;Torterra,12
+Torterra:35;5;10;12;5,3,2;;
+Snivy:10;20;20;1;2,4,4;Razor Leaf;Servine,6
+Servine:10;20;20;6;2,4,4;;Serperior,12
+Serperior:5;25;20;12;2,4,4;;
