@@ -97,14 +97,16 @@ class pokemon():
             self.speed += self.scaleing[2]
             self.hp["current"] = self.hp["max"]
             #defined to make prcess easier
-        if force == True:
+        if force == True and ai == False:
             applyChanges()
             return
-        if self.xp >= pokemon.XpThresholds[self.level-1]:
+        elif self.xp >= pokemon.XpThresholds[self.level-1]:
             self.xp -= pokemon.XpThresholds[self.level-1]
             #checks if xp is suffecient for level up, and applies it
             applyChanges()
             #increases all attributes by their relevant amount
+        elif force == True:
+            applyChanges()
         if (self.level - 1) % 3 ==0:
             if ai == True:
                 self.addAttack(True) # they learn a new attack every 3 levels, meaning they will have 6 by the end
@@ -131,12 +133,11 @@ class pokemon():
                         avalible.append(j)
                 except AttributeError:
                     avalible.append(data[i]) # makes a list of attack availible to learn
-            avalible = removeDuplicates(self.Attacks,avalible)
+        avalible = removeDuplicates(self.Attacks,avalible)
         if npc == True:
-            
             if len(self.Attacks) >= 6:
                 self.Attacks.pop(0)
-            chosen = random.randint(0,len(avalible))
+            chosen = random.randint(0,len(avalible)-1)
             self.Attacks.append(avalible[chosen])
             return
         else: 
@@ -207,7 +208,6 @@ class combat():
 
     def makeAttack(self,attackInfo,target,hit = False):
         hitchance = (attackInfo[1] - target.dodge)
-        print(hitchance)
         if random.randint(1,100) <= hitchance or hit == True:
             return attackInfo[0]
         else:
@@ -278,10 +278,18 @@ Their Active Pokemon:
         pass
 
     def npcDecide(self):
-        #determine the AI's action
-        #calculate a weight for all of its possible actions then choose that, note, the ai will only swap when one of its poke's faints
+        #pick an attack then use it, fairly simple
+        attacks = self.activeEnemy.Attacks
+        weights = [(self.activeEnemy.attack(x)[0] + self.activeEnemy.attack(x)[1]) for x in range(0,len(attacks))]
+        codedWeights = [weights[0]]
+        for i in range(1,len(weights)):
+            codedWeights.append(weights[i]+codedWeights[i-1])
+        roll = random.randint(0,codedWeights[-1])
+        for i in range(0,len(codedWeights)):
+            if roll <= codedWeights[i]:
+                attack = self.activeEnemy.attack(i)
+                return [["Attack",self.activeEnemy.speed],attack,self.activeEnemy.Attacks[i]]
         return [["Skip turn",100],]
-        pass
 
 
     def resolve(self,player=[["Skip Turn",100],],npc = [["Skip Turn",100],]):
@@ -343,7 +351,7 @@ Their Active Pokemon:
     
 
 
-def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalised fucntion to create pokemon objects of a given pokemon name (ie "Pikachu")
+def createPoke(pokeName,given = "",evolving = False, old=pokemon(),ai = False): #generalised fucntion to create pokemon objects of a given pokemon name (ie "Pikachu")
     type = pokeDatabase[pokeName]
     stats = readFile(type + "Pokes.txt")[pokeName]
     xp = old.xp
@@ -354,6 +362,8 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
             given = old.givenName
             
         stats[5] = old.Attacks
+    elif stats[5] == "":
+        stats[5] = []
     else:
         stats[5] = [stats[5]]
     for i in range(0,5):
@@ -363,15 +373,16 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon()): #generalise
         else:
             stats[i] = int(stats[i])
     if stats[6] == "":
-        stats[6] = ["",100000]
+        stats[6] = ["God",100000]
+    
     poke = pokemon(actualname=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],Attacks=stats[5],evolutionInfo=stats[6],givenname=given)
     for i in range(0,stats[3]-1):
-        poke.levelUp(force = True,ai = False)
+        poke.levelUp(ai,ai)
     poke.xp = xp
     return poke
 
-you = character([createPoke("Wooper"),createPoke("Mudkip"),createPoke("Squirtle")])
-enemy = character([createPoke("Charmander"),createPoke("Wooper")],0,"Enemy Man")
+you = character([createPoke("Ninetales", ai = True),createPoke("Mudkip"),createPoke("Squirtle")])
+enemy = character([createPoke("Charizard",ai = True),createPoke("Wooper")],0,"Enemy Man")
 fight = combat(you,enemy)
 result = "None"
 while result != True and result != False:
