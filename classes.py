@@ -186,10 +186,6 @@ class character():
         self.pokemon = pokemon
         self.avgLevel = avglevel
         self.name = name
-        types = ["fire","water","air","grass"]
-        if generatePokes == True:
-            for i in range(0,noOfPokes):
-                type = types[random.randint(0,4)]
 
 
 
@@ -381,9 +377,9 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon(),ai = False): 
     poke.xp = xp
     return poke
 
-you = character([createPoke("Ninetales", ai = True),createPoke("Mudkip"),createPoke("Squirtle")])
-enemy = character([createPoke("Charizard",ai = True),createPoke("Wooper")],0,"Enemy Man")
-fight = combat(you,enemy)
-result = "None"
-while result != True and result != False:
-    result = fight.oneRound()
+# you = character([createPoke("Ninetales", ai = True),createPoke("Mudkip"),createPoke("Squirtle")])
+# enemy = character([createPoke("Charizard",ai = True),createPoke("Wooper")],0,"Enemy Man")
+# fight = combat(you,enemy)
+# result = "None"
+# while result != True and result != False:
+#     result = fight.oneRound()
