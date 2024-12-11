@@ -1,10 +1,10 @@
 Rookidee:15;20;15;1;3,4,3;Wing Attack;Corvisquire,6
-Corvisquire:20;15,15;6;4,3,3;;Corviknight,12
+Corvisquire:20;15;15;6;4,3,3;;Corviknight,12
 Corviknight:30;10;10;12;5,3,2;;
 Pidgey:15;15;20;1;3,3,4;Wing Attack;Pidgeotte,6
 Pidgeotte:20;15;15;6;4,3,3;;Pidgeot,12
 Pidgeot:25;15;10;12;4,3,3;;
 Noibat:10;20;20;1;2,4,4;Gust;Noivern,10
-Noivern:10,20,20;10;2,4,4;;
+Noivern:10;20;20;10;2,4,4;;
 Rufflet:20;15;15;1;4,3,3;Gust;Braviary,10
 Braviary:10;15;25;10;2,3,5;;

@@ -28,8 +28,29 @@ levelsDict = {
 #starting
 #victory message if you reach the end
 
-name = input("What would you like to called: \n")
-player = character(name = name)
+def createEnemy(noPokes,level):
+    enemy = character()
+    temp = [abs(x-level) for x in levelsDict.keys()]
+    keys = list(levelsDict.keys())
+    levelThreshold = keys[temp.index(min(temp))]
+    possible = levelsDict[levelThreshold]
+    for i in range(0,noPokes):
+        type = listOfTypes[random.randint(0,3)]
+        pokes = possible[type]
+        pokeName = pokes[random.randint(0,len(pokes)-1)]
+        poke = createPoke(pokeName,ai = True)
+        poke.addAttack(True)
+        while poke.level < level:
+            poke.levelUp(force = True, ai = True)
+        enemy.pokemon.append(poke)
+
+    return enemy
+    
+foe = createEnemy(6,6)
+
+print([x.actualname for x in foe.pokemon])
+print(foe.pokemon[0].Attacks)
+player = character()
 type = listOfTypes[options(listOfTypes,["type of pokemon","start"])]
 availible = levelsDict[1][type]
 starter = availible[options(availible,["pokemon","pick"])]

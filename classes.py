@@ -55,8 +55,8 @@ def setup():
         return dictionary
     waterTypes = makethetypesdict("waterPokes.txt","water")
     fireTypes = makethetypesdict("firePokes.txt","fire")
-    grassTypes = {}
-    airTypes = {}
+    grassTypes = makethetypesdict("grassPokes.txt","grass")
+    airTypes = makethetypesdict("airPokes.txt","air")
     global pokeDatabase
     pokeDatabase = {**waterTypes,**fireTypes,**grassTypes,**airTypes}
     global typeMatrix
@@ -108,10 +108,7 @@ class pokemon():
         elif force == True:
             applyChanges()
         if (self.level - 1) % 3 ==0:
-            if ai == True:
-                self.addAttack(True) # they learn a new attack every 3 levels, meaning they will have 6 by the end
-            else:
-                self.addAttack()           
+            self.addAttack(ai) # they learn a new attack every 3 levels, meaning they will have 6 by the end           
         if self.level >= int(self.evolutionInfo[1]):
             print(f"{self.givenName} is evolving into a {self.evolutionInfo[0]}")
             self.evolve()
@@ -182,11 +179,15 @@ class pokemon():
 
 
 class character():
-    def __init__(self,pokemon =[],avglevel=0,name = "TestyMcTestFace",generatePokes = False,noOfPokes = 1):
+    def __init__(self,pokemon =[],avglevel=0):
         self.pokemon = pokemon
         self.avgLevel = avglevel
-        self.name = name
 
+    def setAvgLevel(self):
+        total = 0
+        for i in self.pokemon:
+            total += i.level
+        self.avgLevel = total / len(self.pokemon)
 
 
 class combat():
