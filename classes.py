@@ -179,12 +179,16 @@ class pokemon():
 
 
 class character():
-    def __init__(self,pokemon =[],avglevel=0):
-        self.pokemon = pokemon
-        self.avgLevel = avglevel
+    def __init__(self):
+        self.pokemon = []
+        self.avgLevel = 0
+        self.setAvgLevel()
 
     def setAvgLevel(self):
         total = 0
+        if not self.avgLevel:
+            self.avgLevel = 0
+            return
         for i in self.pokemon:
             total += i.level
         self.avgLevel = total / len(self.pokemon)
@@ -224,7 +228,6 @@ class combat():
             print(f"{self.playerPokes[self.currentPokes[0]].actualname} has fainted!")
             if len(self.playerPokes) == 1:
                 #player lost end combat
-                print("You lost lol")
                 return False
             else:
                 
@@ -241,7 +244,7 @@ class combat():
             else:
                 self.enemyPokes.pop(self.currentPokes[1])
                 self.swapPoke(npc=True)
-        pass
+        return None
 
     def playerDecide(self):
         #choose player action

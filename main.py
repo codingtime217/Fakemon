@@ -30,6 +30,7 @@ levelsDict = {
 
 def createEnemy(noPokes,level):
     enemy = character()
+    print(f"enemy = {enemy.pokemon}")
     temp = [abs(x-level) for x in levelsDict.keys()]
     keys = list(levelsDict.keys())
     levelThreshold = keys[temp.index(min(temp))]
@@ -43,17 +44,37 @@ def createEnemy(noPokes,level):
         while poke.level < level:
             poke.levelUp(force = True, ai = True)
         enemy.pokemon.append(poke)
-
+    enemy.setAvgLevel()
     return enemy
     
-foe = createEnemy(6,6)
+def runBattle(player):
+    player.setAvgLevel()
+    enemy = createEnemy(len(player.pokemon),player.avgLevel)
+    print(f"enemy: {enemy.pokemon}")
+    battle = combat(player,enemy)
+    result = battle.oneRound()
+    while result != True and result != False:
+        result = battle.oneRound()
+    if result == False:
+        print("Unfortunately you lost this battle and the game")
+        return False
+    else:
+        xp = enemy.avgLevel * 100
+        print(f"You won! All your pokemon gain {xp}")
+        for i in player.pokemon:
+            i.xp += xp
+            i.levelUp()
+        player.setAvgLevel
 
-print([x.actualname for x in foe.pokemon])
-print(foe.pokemon[0].Attacks)
-player = character()
-type = listOfTypes[options(listOfTypes,["type of pokemon","start"])]
-availible = levelsDict[1][type]
-starter = availible[options(availible,["pokemon","pick"])]
-name = input("What would you like to nmae your pokemon? \n")
-player.pokemon.append(createPoke(starter,name))
-print(player.pokemon)
+def createCharacter():
+    temp = character()
+    type = listOfTypes[options(listOfTypes,["type of pokemon","start"])]
+    availible = levelsDict[1][type]
+    starter = availible[options(availible,["pokemon","pick"])]
+    name = input("What would you like to name your pokemon? \n")
+    temp.pokemon.append(createPoke(starter,name))
+    return temp
+
+player = createCharacter()
+print(f"Plater :{player.pokemon}")
+runBattle(player)
