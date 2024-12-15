@@ -22,19 +22,21 @@ levelsDict = {
     "Grass":["Venasaur","Torterra","Serperior"],
     "Air":["Corviknight","Pidgeot"]} }
 #big dictionary storing all the pokemon names sorted by type and by inital level
-# need to make a system for:
-#generating sets of opponet pokeomn
-#gaining new pokemon as a player
-#starting
+# need to make a system for - done
+#generating sets of opponet pokeomn - deon
+#gaining new pokemon as a player - done
+#starting -sort of done
+#healing pokemon every few battles
 #victory message if you reach the end
 
 def createEnemy(noPokes,level):
     enemy = character()
-    print(f"enemy = {enemy.pokemon}")
+    level = min(1,level - 2)
     temp = [abs(x-level) for x in levelsDict.keys()]
     keys = list(levelsDict.keys())
     levelThreshold = keys[temp.index(min(temp))]
     possible = levelsDict[levelThreshold]
+    #determines which range of pokemon to randomly select from, to ensure evolutions only appear after the player should have one
     for i in range(0,noPokes):
         type = listOfTypes[random.randint(0,3)]
         pokes = possible[type]
@@ -44,27 +46,37 @@ def createEnemy(noPokes,level):
         while poke.level < level:
             poke.levelUp(force = True, ai = True)
         enemy.pokemon.append(poke)
+        #adds pokemon
     enemy.setAvgLevel()
     return enemy
     
 def runBattle(player):
-    player.setAvgLevel()
-    enemy = createEnemy(len(player.pokemon),player.avgLevel)
-    print(f"enemy: {enemy.pokemon}")
+    player.setAvgLevel() #update player's avergae pkemon level
+    enemy = createEnemy(len(player.pokemon),player.avgLevel)#make an eneemy with the same number of pokemon with the same average level
     battle = combat(player,enemy)
     result = battle.oneRound()
-    while result != True and result != False:
+    while result != True and result != False: # run combat until its joever
         result = battle.oneRound()
     if result == False:
         print("Unfortunately you lost this battle and the game")
         return False
     else:
-        xp = enemy.avgLevel * 100
-        print(f"You won! All your pokemon gain {xp}")
+        xp = min(1,enemy.avgLevel) * 500
+        print(xp)
+        print(f"You won! All your pokemon gain {xp} xp")
         for i in player.pokemon:
             i.xp += xp
             i.levelUp()
+        #give xp if they win
         player.setAvgLevel
+        choices = options(["Do Not Capture Pokemon"]+[i.givenName for i in enemy.pokemon],["pokemon","capture"])
+        if choices != 0:
+            name = input("What would you like to name your pokemon? \n")
+            newPokemon =enemy.pokemon[choices-1]
+            newPokemon.givenName = name
+            player.pokemon.append(newPokemon)
+        #let them obtain a new pokemon if they want
+        return True
 
 def createCharacter():
     temp = character()
@@ -72,9 +84,11 @@ def createCharacter():
     availible = levelsDict[1][type]
     starter = availible[options(availible,["pokemon","pick"])]
     name = input("What would you like to name your pokemon? \n")
+    #makes the player
     temp.pokemon.append(createPoke(starter,name))
+    
     return temp
-
 player = createCharacter()
-print(f"Plater :{player.pokemon}")
-runBattle(player)
+while runBattle(player):
+    pass
+

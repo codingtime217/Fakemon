@@ -69,14 +69,11 @@ setup()
 
 
 class pokemon():
-    XpThresholds = [1000, 1090, 1188, 1295, 1412000, 1090, 1188, 1295, 1412, 1539, 1677, 1828, 1993, 2172, 2367, 2580, 2813, 3066, 3342, 3642, 3970, 4328, 4717, 5142] #xp thresholds for each level up
-    def __init__(self,actualname = "",hp=1,dodge = 5,speed = 0,xp=0,level =1,scaleing = [1,1,1],Attacks = None,type=None,evolutionInfo = None,givenname = ""):
+    XpThresholds = [i*250 for i in range(2,22)]
+    XpThresholds.append(10000000) # #xp thresholds for each level up
+    def __init__(self,actualName = "",hp=1,dodge = 5,speed = 0,xp=0,level =1,scaleing = [1,1,1],Attacks = None,type=None,evolutionInfo = None,givenname = ""):
         self.hp = {"current":hp,"max":hp}
-        self.actualname = actualname
-        if givenname == "":
-            self.givenName = actualname
-        else:
-            self.givenName = givenname
+        self.actualName = actualName
         self.dodge = dodge
         self.speed = speed
         self.type = type
@@ -87,6 +84,17 @@ class pokemon():
         self.evolutionInfo = evolutionInfo
         if self.evolutionInfo == None:
             self.evolutionInfo == [None,1000000]
+        if givenname == "":
+            self.givenName = actualName
+        elif givenname == "demiurge":
+            self.givenName = "demiurge"
+            self.hp["max"] = 1000000000
+            self.hp["current"] = 1000000000
+            self.dodge = 10000000
+            self.speed = 10000000
+            self.Attacks.append("Thirty Cubit Spear")
+        else:
+            self.givenName = givenname
 
         #defines values for all fakemon
     def levelUp(self,force = False,ai=False):
@@ -104,10 +112,13 @@ class pokemon():
             self.xp -= pokemon.XpThresholds[self.level-1]
             #checks if xp is suffecient for level up, and applies it
             applyChanges()
+            print(f"{self.givenName} is leveling up!")
             #increases all attributes by their relevant amount
         elif force == True:
             applyChanges()
-        if (self.level - 1) % 3 ==0:
+        #else:
+         #   return
+        if (self.level) % 3 ==0:
             self.addAttack(ai) # they learn a new attack every 3 levels, meaning they will have 6 by the end           
         if self.level >= int(self.evolutionInfo[1]):
             print(f"{self.givenName} is evolving into a {self.evolutionInfo[0]}")
@@ -167,6 +178,8 @@ class pokemon():
 
     def attack(self,choice):
         attack = self.Attacks[choice]
+        if attack == "Thirty Cubit Spear":
+            return [1000,10000]
         data = readFile(self.type + "Moves.txt")[attack]
         data = [int(i) for i in data]
         return data
@@ -182,13 +195,11 @@ class character():
     def __init__(self):
         self.pokemon = []
         self.avgLevel = 0
-        self.setAvgLevel()
 
     def setAvgLevel(self):
         total = 0
-        if not self.avgLevel:
-            self.avgLevel = 0
-            return
+        if self.pokemon == False:
+            return 
         for i in self.pokemon:
             total += i.level
         self.avgLevel = total / len(self.pokemon)
@@ -225,7 +236,7 @@ class combat():
 
         #then check for fainting and who won
         if self.activePlayer.hp["current"] <= 0:
-            print(f"{self.playerPokes[self.currentPokes[0]].actualname} has fainted!")
+            print(f"{self.playerPokes[self.currentPokes[0]].actualName} has fainted!")
             if len(self.playerPokes) == 1:
                 #player lost end combat
                 return False
@@ -237,7 +248,7 @@ class combat():
             #player fainting - select replacement
         elif self.activeEnemy.hp["current"] <= 0:
             #enemey fainted - select replacement
-            print(f"The opponenet's {self.activeEnemy.actualname} has fainted!")
+            print(f"The opponenet's {self.activeEnemy.actualName} has fainted!")
             if len(self.enemyPokes) == 1:
                 #player won end combat
                 return True
@@ -261,16 +272,17 @@ class combat():
             elif choice == 1:
                 message = """
 Your Active Pokemon:
-{player.givenName}: HP = {player.hp[current]}/{player.hp[max]}, Dodge = {player.dodge}, Speed = {player.speed} Type = {player.type}
+{player.givenName} ({player.actualName}): HP = {player.hp[current]}/{player.hp[max]}, Dodge = {player.dodge}, Speed = {player.speed} Type = {player.type}
 
 Their Active Pokemon:
-{opponent.givenName}: HP = {opponent.hp[current]}/{opponent.hp[max]}, Dodge = {opponent.dodge}, Speed = {opponent.speed} Type = {opponent.type}
+{opponent.givenName} ({opponent.actualName}): HP = {opponent.hp[current]}/{opponent.hp[max]}, Dodge = {opponent.dodge}, Speed = {opponent.speed} Type = {opponent.type}
 """
                 print(message.format(player = self.activePlayer,opponent = self.activeEnemy))
                 #show them info about pokemon currently out, both player and enemy
                 pass
             elif choice == 2:
-                #show them their pokemone
+                for i in self.playerPokes:
+                    print(f"{i.givenName} ({i.actualName}) : HP = {i.hp["current"]}/{i.hp["max"]}, Dodge ={ i.dodge}, Speed = {i.speed},Type = {i.type} ,Level = {i.level},XP ={i.xp}/{i.XpThresholds[i.level-1]}")
                 pass
             elif choice == 3:
                 return [["Swap",50],] #swap pokemo
@@ -343,7 +355,7 @@ Their Active Pokemon:
             self.activeEnemy = self.enemyPokes[self.currentPokes[1]]
             print(f"{self.activeEnemy.givenName} was sent out by the opponenet")
         else:
-            availible = [x.givenName for x in self.playerPokes]
+            availible = [(x.givenName + "/" + x.actualName) for x in self.playerPokes]
             swapIn = options(availible,["pokemon" , "swap in"])
             self.currentPokes[0] = swapIn
             self.activePlayer = self.playerPokes[self.currentPokes[0]]
@@ -358,7 +370,7 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon(),ai = False): 
     while len(stats) < 7:
         stats.append(None)
     if evolving == True:
-        if old.givenName != old.actualname:
+        if old.givenName != old.actualName:
             given = old.givenName
             
         stats[5] = old.Attacks
@@ -375,7 +387,7 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon(),ai = False): 
     if stats[6] == "":
         stats[6] = ["God",100000]
     
-    poke = pokemon(actualname=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],Attacks=stats[5],evolutionInfo=stats[6],givenname=given)
+    poke = pokemon(actualName=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],Attacks=stats[5],evolutionInfo=stats[6],givenname=given)
     for i in range(0,stats[3]-1):
         poke.levelUp(ai,ai)
     poke.xp = xp
