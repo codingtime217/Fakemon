@@ -65,10 +65,11 @@ def runBattle(player):
         print(xp)
         print(f"You won! All your pokemon gain {xp} xp")
         for i in player.pokemon:
+            i.hp["current"] += i.hp["max"] // 2
             i.xp += xp
             i.levelUp()
         #give xp if they win
-        player.setAvgLevel
+        player.setAvgLevel()
         choices = options(["Do Not Capture Pokemon"]+[i.givenName for i in enemy.pokemon],["pokemon","capture"])
         if choices != 0:
             name = input("What would you like to name your pokemon? \n")
@@ -88,7 +89,11 @@ def createCharacter():
     temp.pokemon.append(createPoke(starter,name))
     
     return temp
-player = createCharacter()
-while runBattle(player):
-    pass
+
+while options(["Play the game","Quit"],["option","do"]) == 0:
+    player = createCharacter()
+    while runBattle(player):
+        if player.avgLevel == 20 and len(player.pokemon):
+            print("You have become the very best, that no one ever was!")
+            print("You win!!!!")
 
