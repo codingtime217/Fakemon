@@ -76,6 +76,7 @@ def runBattle(player):
             newPokemon =enemy.pokemon[choices-1]
             newPokemon.givenName = name
             player.pokemon.append(newPokemon)
+            player.pokemon[-1].hp["current"] += player.pokemon[-1].hp["max"] // 2
         #let them obtain a new pokemon if they want
         return True
 
