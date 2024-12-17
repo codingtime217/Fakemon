@@ -367,6 +367,7 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon(),ai = False): 
     type = pokeDatabase[pokeName]
     stats = readFile(type + "Pokes.txt")[pokeName]
     xp = old.xp
+    #loads all the intial data
     while len(stats) < 7:
         stats.append(None)
     if evolving == True:
@@ -374,6 +375,7 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon(),ai = False): 
             given = old.givenName
             
         stats[5] = old.Attacks
+        #ensures evolutions keep their previous attacks
     elif stats[5] == "":
         stats[5] = []
     else:
@@ -386,16 +388,10 @@ def createPoke(pokeName,given = "",evolving = False, old=pokemon(),ai = False): 
             stats[i] = int(stats[i])
     if stats[6] == "":
         stats[6] = ["God",100000]
-    
+    # sets stats to where they should be and 
     poke = pokemon(actualName=pokeName,hp=stats[0],dodge=stats[1],speed=stats[2],type=type,scaleing=stats[4],Attacks=stats[5],evolutionInfo=stats[6],givenname=given)
     for i in range(0,stats[3]-1):
         poke.levelUp(ai,ai)
+        #gets the level to be accurate
     poke.xp = xp
     return poke
-
-# you = character([createPoke("Ninetales", ai = True),createPoke("Mudkip"),createPoke("Squirtle")])
-# enemy = character([createPoke("Charizard",ai = True),createPoke("Wooper")],0,"Enemy Man")
-# fight = combat(you,enemy)
-# result = "None"
-# while result != True and result != False:
-#     result = fight.oneRound()
